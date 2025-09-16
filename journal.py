@@ -23,21 +23,36 @@ def ensure_today_entry():
     return today_entry
 
 def write_to_entry(path):
+    today = os.open(os.path.join(entries_path, today_filename()), os.O_RDONLY)
+    read = os.read(today, 1024).decode()
+    os.close(today)
+    print(read)
+    
     while True:
-        flags = os.O_RDWR | os.O_APPEND
-        fd = os.open(path, flags)
         user_input = input("type to the entry: ")
         if user_input == ":q":
             print("exiting write mode")
             break
-        os.write(fd, (user_input + "\n").encode("utf-8"))
-        os.close(fd)
+        else:
+            flags = os.O_RDWR | os.O_APPEND
+            fd = os.open(path, flags)
+            os.write(fd, (user_input + "\n").encode("utf-8"))
+            os.close(fd)
     
-def read_choice(choice_entry):
-    flags = os.O_RDONLY
-    fd = os.open(choice_entry, flags)
-    content = os.read(fd, 1024).decode()
-    print(content)
+def read_choice():
+    while True:
+        try:
+            show_entries()
+            user_choice = input("type in the entry you want to read: \n")
+            if user_choice == ':q':
+                break
+            flags = os.O_RDONLY
+            fd = os.open(os.path.join(entries_path, user_choice), flags)
+            content = os.read(fd, 1024).decode()
+            print(content)
+        except FileNotFoundError:
+            print('THE FILE DOESN\'T EXIST, ENTER A VALID FILE')
+            continue
 
 def prompt_main():
     print("\nWelcome to journal!")
@@ -60,10 +75,8 @@ def main():
         if choice == "W":
             write_to_entry(today)
 
-        elif choice == "R":
-            show_entries() 
-            user_choice = input("type in the entry you want to read: \n")
-            read_choice(os.path.join(entries_path, user_choice))
+        elif choice == "R": 
+            read_choice()
 
         elif choice == "Q":
             break
