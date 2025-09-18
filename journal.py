@@ -24,12 +24,14 @@ def ensure_today_entry():
 
 def write_to_entry(path):
     today = os.open(os.path.join(entries_path, today_filename()), os.O_RDONLY)
-    read = os.read(today, 1024).decode()
+    read = os.read(today, 5000).decode()
     os.close(today)
+    print('------------------------------')
     print(read)
-    
+    print('------------------------------')
+
     while True:
-        user_input = input("type to the entry: ")
+        user_input = input("type to the entry: or type :q to exit W mode\n-> ")
         if user_input == ":q":
             print("exiting write mode")
             break
@@ -43,16 +45,19 @@ def read_choice():
     while True:
         try:
             show_entries()
-            user_choice = input("type in the entry you want to read: \n")
+            user_choice = input("type in the entry you want to read: or type :q to exit R mode\n-> ")
             if user_choice == ':q':
                 break
             flags = os.O_RDONLY
             fd = os.open(os.path.join(entries_path, user_choice), flags)
-            content = os.read(fd, 1024).decode()
+            content = os.read(fd, 5000).decode()
+            print('------------------------------')
             print(content)
+            print('------------------------------')
         except FileNotFoundError:
             print('THE FILE DOESN\'T EXIST, ENTER A VALID FILE')
-            continue
+        except IsADirectoryError:
+            print('THE FILE DOESN\'T EXIST, ENTER A VALID FILE')
 
 def prompt_main():
     print("\nWelcome to journal!")
@@ -63,7 +68,11 @@ def prompt_main():
 
 def show_entries():
     entries = os.listdir(entries_path)
-    print(entries) 
+    
+    print('------------------------------')
+    for entry in entries:
+        print(entry)
+    print('------------------------------')
 
 def main():
     ensure_entries_dir()
@@ -79,6 +88,7 @@ def main():
             read_choice()
 
         elif choice == "Q":
+            print('Bye!')
             break
 
 main()
